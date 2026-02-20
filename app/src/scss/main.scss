@@ -151,17 +151,8 @@ body {
     background-color: var(--bg-surface);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
-    overflow-x: auto;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-
-    &::-webkit-scrollbar {
-        display: none;
-    }
-
-    @media (min-width: 700px) {
-        justify-content: center;
-    }
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .tab {
