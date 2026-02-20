@@ -71,7 +71,7 @@ Now you can access the server on your [localhost port 8080](http://localhost:808
 
 ## APIs
 
-### `GET /findings`
+### `GET /api/findings`
 Returns a paginated list of all findings.
 - **Query Parameters:**
   - `page` (integer, default: 1): The page number to retrieve.
@@ -100,7 +100,7 @@ Returns a paginated list of all findings.
   }
   ```
 
-### `GET /findings/count`
+### `GET /api/findings/count`
 Returns the total number of findings.
 
 - **Response Body:**
@@ -110,7 +110,7 @@ Returns the total number of findings.
   }
   ```
 
-### `GET /repository`
+### `GET /api/repository`
 Returns information about a specific repository.
 - **Query Parameters:**
   - `repo_url` (string, required): The full API URL of the repository (e.g., `https://api.github.com/repos/user/repo`).
@@ -124,7 +124,7 @@ Returns information about a specific repository.
   }
   ```
 
-### `GET /repository/findings`
+### `GET /api/repository/findings`
 Returns a paginated list of findings for a specific repository.
 - **Query Parameters:**
   - `repo_url` (string, required): The full API URL of the repository.
@@ -152,7 +152,7 @@ Returns a paginated list of findings for a specific repository.
   }
   ```
 
-### `GET /repositories`
+### `GET /api/repositories`
 Returns a paginated list of all scanned repositories.
 - **Query Parameters:**
   - `page` (integer, default: 1): The page number to retrieve.

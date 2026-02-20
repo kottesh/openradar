@@ -5,15 +5,13 @@ import (
 	"fmt"
 	"io/fs"
 	"log"
+	"net"
 	"net/http"
-	"strconv"
 	"sync"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-
-	"openradar/internal/api"
 
 	"golang.org/x/time/rate"
 	"gorm.io/gorm"
@@ -137,13 +135,27 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 	json.NewEncoder(w).Encode(v)
 }
 
+func remoteIP(r *http.Request) string {
+	if forwarded := r.Header.Get("X-Forwarded-For"); forwarded != "" {
+		if ip, _, err := net.SplitHostPort(forwarded); err == nil {
+			return ip
+		}
+		return forwarded
+	}
+	ip, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		return r.RemoteAddr
+	}
+	return ip
+}
+
 func StartServer(db *gorm.DB, cfg config.Config) *Hub {
 	router := chi.NewRouter()
 
 	ipl := newIPLimiter()
 	rateLimitMiddleware := func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			limiter := ipl.getLimiter(r.RemoteAddr)
+			limiter := ipl.getLimiter(remoteIP(r))
 			if !limiter.Allow() {
 				http.Error(w, "Rate limit exceeded", http.StatusTooManyRequests)
 				return
@@ -172,56 +184,8 @@ func StartServer(db *gorm.DB, cfg config.Config) *Hub {
 		log.Fatal(err)
 	}
 
-	// This returns the findings (scraped api keys)
-	router.Get("/api/findings", func(w http.ResponseWriter, r *http.Request) {
-		pageStr := r.URL.Query().Get("page")
-		page := 1
-		if pageStr != "" {
-			if val, err := strconv.Atoi(pageStr); err == nil && val > 0 {
-				page = val
-			}
-		}
-
-		pageSizeStr := r.URL.Query().Get("page_size")
-		pageSize := 25
-		if pageSizeStr != "" {
-			if val, err := strconv.Atoi(pageSizeStr); err == nil && val > 0 && val <= 100 {
-				pageSize = val
-			}
-		}
-
-		provider := r.URL.Query().Get("provider")
-		if provider == "" {
-			provider = "*"
-		}
-
-		minAge := r.URL.Query().Get("min_age")
-		if minAge == "" {
-			minAge = "24h"
-		}
-
-		paginatedFindings, err := api.GetLatestFindings(
-			page,
-			pageSize,
-			provider,
-			minAge,
-			db,
-		)
-		if err != nil {
-			log.Printf("GET /findings error: %v", err)
-			http.Error(w, "failed to fetch findings", http.StatusInternalServerError)
-			return
-		}
-
-		writeJSON(w, http.StatusOK, paginatedFindings)
-	})
-
-	// This returns the count of all of the findings (scraped keys)
-	router.Get("/api/findings/count", func(w http.ResponseWriter, r *http.Request) {
-		count := api.GetFindingsCount()
-
-		writeJSON(w, http.StatusOK, map[string]int64{"total_count": count})
-	})
+	const pingInterval = 30 * time.Second
+	const connDeadline = 60 * time.Second
 
 	// This provides a websocket that sends each repository scanned to clients
 	router.Get("/ws/live", func(w http.ResponseWriter, r *http.Request) {
@@ -231,136 +195,48 @@ func StartServer(db *gorm.DB, cfg config.Config) *Hub {
 			return
 		}
 
-		conn.SetReadDeadline(time.Now().Add(120 * time.Second))
+		conn.SetReadDeadline(time.Now().Add(connDeadline))
 		conn.SetPongHandler(func(string) error {
-			conn.SetReadDeadline(time.Now().Add(120 * time.Second))
+			conn.SetReadDeadline(time.Now().Add(connDeadline))
 			return nil
 		})
 
 		hub.add(conn)
 		defer hub.remove(conn)
 
+		ticker := time.NewTicker(pingInterval)
+		defer ticker.Stop()
+
+		done := make(chan struct{})
+		go func() {
+			defer close(done)
+			for {
+				_, _, err := conn.ReadMessage()
+				if err != nil {
+					return
+				}
+			}
+		}()
+
 		for {
-			_, _, err := conn.ReadMessage()
-			if err != nil {
-				break
+			select {
+			case <-done:
+				return
+			case <-ticker.C:
+				if err := conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+					return
+				}
 			}
 		}
-
 	})
 
-	// This returns information on a repository
-	router.Get("/api/repository", func(w http.ResponseWriter, r *http.Request) {
-		repoUrl := r.URL.Query().Get("repo_url")
-		if repoUrl == "" {
-			http.Error(w, "repo_url parameter is required", http.StatusBadRequest)
-			return
-		}
+	// Handles API
 
-		repositories, err := api.GetRepositoryInfo(repoUrl, db)
-		if err != nil {
-			log.Printf("GET /repository error: %v", err)
-			http.Error(w, "failed to fetch repository", http.StatusInternalServerError)
-			return
-		}
-
-		if len(repositories) == 0 {
-			http.Error(w, "Repository not found", http.StatusNotFound)
-			return
-		}
-
-		writeJSON(w, http.StatusOK, repositories[0])
-	})
-
-	// This gets the amount of repositories scanned.
-	router.Get("/api/repositories/count", func(w http.ResponseWriter, r *http.Request) {
-		count := api.GetRepositoriesCount()
-
-		writeJSON(w, http.StatusOK, map[string]int64{"total_count": count})
-	})
-
-	// This gets the findings for a specific repository
-	router.Get("/api/repository/findings", func(w http.ResponseWriter, r *http.Request) {
-		repoUrl := r.URL.Query().Get("repo_url")
-		if repoUrl == "" {
-			http.Error(w, "repo_url parameter is required", http.StatusBadRequest)
-			return
-		}
-
-		pageStr := r.URL.Query().Get("page")
-		page := 1
-		if pageStr != "" {
-			if val, err := strconv.Atoi(pageStr); err == nil && val > 0 {
-				page = val
-			}
-		}
-
-		pageSizeStr := r.URL.Query().Get("page_size")
-		pageSize := 25
-		if pageSizeStr != "" {
-			if val, err := strconv.Atoi(pageSizeStr); err == nil && val > 0 && val <= 100 {
-				pageSize = val
-			}
-		}
-
-		paginatedFindings, err := api.GetFindingsFromRepository(repoUrl, page, pageSize, db)
-		if err != nil {
-			log.Printf("GET /repository/findings error: %v", err)
-			http.Error(w, "failed to fetch findings", http.StatusInternalServerError)
-			return
-		}
-
-		writeJSON(w, http.StatusOK, paginatedFindings)
-	})
-
-	// This gets scanned repositories by page (pagination)
-	router.Get("/api/repositories", func(w http.ResponseWriter, r *http.Request) {
-		pageStr := r.URL.Query().Get("page")
-		page := 1
-		if pageStr != "" {
-			if val, err := strconv.Atoi(pageStr); err == nil && val > 0 {
-				page = val
-			}
-		}
-
-		pageSizeStr := r.URL.Query().Get("page_size")
-		pageSize := 25
-		if pageSizeStr != "" {
-			if val, err := strconv.Atoi(pageSizeStr); err == nil && val > 0 && val <= 100 {
-				pageSize = val
-			}
-		}
-
-		paginatedRepos, err := api.GetAllRepositories(page, pageSize, db)
-		if err != nil {
-			log.Printf("GET /repositories error: %v", err)
-			http.Error(w, "failed to fetch repositories", http.StatusInternalServerError)
-			return
-		}
-
-		writeJSON(w, http.StatusOK, paginatedRepos)
-	})
-
-	// This returns top 3 users (top 3 meaning most leaked keys from them)
-	router.Get("/api/leaderboard", func(w http.ResponseWriter, r *http.Request) {
-		findings := api.GetLeaderboardData()
-		print(findings)
-		writeJSON(w, http.StatusOK, findings)
-	})
+	InitRepositories(router, db)
+	InitFindings(router, db)
+	InitLeaderboard(router, db, distFS)
 
 	fileServer := http.FileServer(http.FS(distFS))
-
-	// This returns the page for the leaderboard (/* requires .html in the name, hence why we do this)
-	router.Get("/leaderboard", func(w http.ResponseWriter, r *http.Request) {
-		f, err := distFS.Open("leaderboard.html")
-		if err != nil {
-			http.NotFound(w, r)
-			return
-		}
-		defer f.Close()
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		http.ServeFileFS(w, r, distFS, "leaderboard.html")
-	})
 
 	// This handles index.html and whatnot
 	router.Handle("/*", fileServer)
@@ -375,6 +251,10 @@ func StartServer(db *gorm.DB, cfg config.Config) *Hub {
 	}
 
 	// Listens for conns & serves
-	go srv.ListenAndServe()
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("server error: %v", err)
+		}
+	}()
 	return hub
 }
