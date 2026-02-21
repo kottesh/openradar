@@ -1,6 +1,3 @@
-import '../scss/main.scss';
-import '../scss/leaderboard.scss';
-
 function setLeaderboard() {
     fetch('/api/leaderboard')
         .then(response => response.json())

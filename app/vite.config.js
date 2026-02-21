@@ -12,6 +12,7 @@ export default defineConfig({
             input: {
                 main: resolve(__dirname, 'src/index.html'),
                 leaderboard: resolve(__dirname, 'src/leaderboard.html'),
+                docs: resolve(__dirname, 'src/docs.html'),
             },
         },
     }

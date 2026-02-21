@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenRadar - API Documentation</title>
+    <link rel="stylesheet" href="/scss/docs.scss">
+    <link rel="stylesheet" href="/scss/main.scss">
+    <link rel="icon" href="or_logo.png" type="image/png">
+
+    <meta property="og:title" content="OpenRadar - API Documentation">
+    <meta property="og:description"
+         content="OpenRadar is a tool designed to find leaked Github credentials that are pushed to repositories.">
+    <meta property="og:image" content="screenshot.png">
+    <meta property="og:image" content="https://open-radar.live">
+    <meta property="og:type" content="website">
+    <meta property="theme-color" content="#2BA84A">
+
+</head>
+
+<body>
+
+    <nav class="top-nav">
+        <div class="nav-content">
+            <span class="nav-logo">OpenRadar</span>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Explore</a>
+                <a href="/leaderboard" class="nav-link">Leaderboard</a>
+                <a href="/docs" class="nav-link active">Documentation</a>
+            </div>
+            <a href="https://github.com/officialmelon/openradar" target="_blank" rel="noopener noreferrer"
+                class="github-link">
+                Made by @officialmelon
+            </a>
+        </div>
+    </nav>
+
+    <div class="docs-hero">
+        <h1 class="docs-title">API Documentation</h1>
+        <p class="docs-subtitle">Base URL: <code>https://open-radar.live</code></p>
+    </div>
+
+    <main class="docs-container">
+
+        <!--/api/findings-->
+        <section class="endpoint-card" id="get-findings">
+            <div class="endpoint-header">
+                <span class="method-badge get">GET</span>
+                <span class="endpoint-path">/api/findings</span>
+            </div>
+            <p class="endpoint-desc">Returns paginated leaked secrets scraped from GitHub repositories.</p>
+            <div class="params-section">
+                <h3>Query Parameters</h3>
+                <div class="param-grid">
+                    <div class="param">
+                        <div class="param-name">page <span class="param-type">integer</span></div>
+                        <div class="param-detail">Page number. Default: <code>1</code></div>
+                    </div>
+                    <div class="param">
+                        <div class="param-name">page_size <span class="param-type">integer</span></div>
+                        <div class="param-detail">Results per page (1-100). Default: <code>25</code></div>
+                    </div>
+                    <div class="param">
+                        <div class="param-name">provider <span class="param-type">string</span></div>
+                        <div class="param-detail">Filter by provider (e.g. openai, anthropic, google). Default: <code>*</code> (all)</div>
+                    </div>
+                    <div class="param">
+                        <div class="param-name">min_age <span class="param-type">string</span></div>
+                        <div class="param-detail">Time window as Go duration (e.g. 24h, 168h). Default: <code>24h</code></div>
+                    </div>
+                </div>
+            </div>
+            <div class="response-section">
+                <h3>Response</h3>
+                <pre class="code-block"><code>{
+  "findings": [
+    {
+      "id": "uuid",
+      "scan_job_id": "uuid",
+      "repo_name": "https://api.github.com/user/repo",
+      "file_path": "src/config.js",
+      "detected_at": "2026-02-21T06:00:00Z",
+      "key": "sk-abc...xyz",
+      "provider": "openai"
+    }
+  ],
+  "page": 1,
+  "page_size": 25,
+  "total_count": 1842,
+  "total_pages": 74
+}</code></pre>
+            </div>
+        </section>
+
+        <!--/api/findings/count-->
+        <section class="endpoint-card" id="get-findings-count">
+            <div class="endpoint-header">
+                <span class="method-badge get">GET</span>
+                <span class="endpoint-path">/api/findings/count</span>
+            </div>
+            <p class="endpoint-desc">Returns the amount of findings scraped in total.</p>
+            <div class="params-section">
+                <div class="param-grid">
+                </div>
+            </div>
+            <div class="response-section">
+                <h3>Response</h3>
+                <pre class="code-block"><code>{
+  "total_count": 1842,
+}</code></pre>
+            </div>
+        </section>
+
+        <!--/api/repositories-->
+        <section class="endpoint-card" id="get-repositories">
+            <div class="endpoint-header">
+                <span class="method-badge get">GET</span>
+                <span class="endpoint-path">/api/repositories</span>
+            </div>
+            <p class="endpoint-desc">Returns paginated scraped GitHub repositories.</p>
+            <div class="params-section">
+                <h3>Query Parameters</h3>
+                <div class="param-grid">
+                    <div class="param">
+                        <div class="param-name">page <span class="param-type">integer</span></div>
+                        <div class="param-detail">Page number. Default: <code>1</code></div>
+                    </div>
+                    <div class="param">
+                        <div class="param-name">page_size <span class="param-type">integer</span></div>
+                        <div class="param-detail">Results per page (1-100). Default: <code>25</code></div>
+                    </div>
+                </div>
+            </div>
+            <div class="response-section">
+                <h3>Response</h3>
+                <pre class="code-block"><code>"repositories": [
+    {
+      "scan_job_id": "uuid",
+      "repo_name": "https://api.github.com/repos/user/",
+      "last_updated": "2026-02-21T06:00:00Z"
+    }
+]</code></pre>
+            </div>
+        </section>
+
+        </section>
+
+        <!--/api/repositories/findings-->
+        <section class="endpoint-card" id="get-findings-for-repo">
+            <div class="endpoint-header">
+                <span class="method-badge get">GET</span>
+                <span class="endpoint-path">/api/repositories/findings</span>
+            </div>
+            <p class="endpoint-desc">Returns the findings for a specific repository.</p>
+            <div class="params-section">
+                <h3>Query Parameters</h3>
+                <div class="param-grid">
+                    <div class="param">
+                        <div class="param-name">repo_url <span class="param-type">string</span></div>
+                        <div class="param-detail">The API url (e.g. https://api.github.com/repos/user/repo_name)</div>
+                    </div>
+                </div>
+            </div>
+            <div class="response-section">
+                <h3>Response</h3>
+                <pre class="code-block"><code>{
+  "findings": [
+    {
+      "id": "uuid",
+      "scan_job_id": "uuid",
+      "repo_name": "https://api.github.com/repos/user/name",
+      "file_path": "src/config.js",
+      "detected_at": "2026-02-21T06:00:00Z",
+      "key": "string",
+      "provider": "string"
+    }
+  ],
+  "page": 1,
+  "page_size": 25,
+  "total_count": 1,
+  "total_pages": 1
+}</code></pre>
+            </div>
+        </section>
+    
+        <!--/api/repositories/count-->
+        <section class="endpoint-card" id="get-repository-count">
+            <div class="endpoint-header">
+                <span class="method-badge get">GET</span>
+                <span class="endpoint-path">/api/repositories/count</span>
+            </div>
+            <p class="endpoint-desc">Returns the amount of repositories scraped in total.</p>
+            <div class="params-section">
+                <div class="param-grid">
+                </div>
+            </div>
+            <div class="response-section">
+                <h3>Response</h3>
+                <pre class="code-block"><code>{
+  "total_count": 56970,
+}</code></pre>
+            </div>
+        </section>
+
+    </main>
+
+</body>
+
+</html>

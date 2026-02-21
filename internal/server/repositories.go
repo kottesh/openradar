@@ -43,7 +43,7 @@ func InitRepositories(router chi.Router, db *gorm.DB) {
 	})
 
 	// This gets the findings for a specific repository
-	router.Get("/api/repository/findings", func(w http.ResponseWriter, r *http.Request) {
+	router.Get("/api/repositories/findings", func(w http.ResponseWriter, r *http.Request) {
 		repoUrl := r.URL.Query().Get("repo_url")
 		if repoUrl == "" {
 			http.Error(w, "repo_url parameter is required", http.StatusBadRequest)
