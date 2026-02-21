@@ -179,6 +179,10 @@ Returns a paginated list of all scanned repositories.
 
 `Golang + Vite`
 
+## Disclaimer
+This web-app is for educational and informational purposes only.
+I am not liable for any damage that can be caused from this.
+
 ## Credits
 @officialmelon (me!)
 
