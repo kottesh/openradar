@@ -23,13 +23,16 @@ func main() {
 
 	queue.NewInMemoryQueue(100)
 
+	log.Print("Initializing DB")
 	database, err := db.New(cfg.Database.URL)
 	if err != nil {
 		log.Fatalf("database init failed: %v", err)
 	}
 
+	log.Print("Starting Server")
 	hub := server.StartServer(database, cfg) // websocket
 
+	log.Print("Starting Workers")
 	for i := 0; i < cfg.Scanner.MaxConcurrentClones; i++ {
 		worker.Start(ctx, cfg, database, hub)
 	}
@@ -40,10 +43,11 @@ func main() {
 		Ctx: ctx,
 	}
 
+	log.Print("Initializing Jobs")
 	jobs.RunJobs(jobContext)
 
 	// When shutting down
 	<-ctx.Done()
 
-	log.Println("Shutting down server...")
+	log.Println("Closing...")
 }

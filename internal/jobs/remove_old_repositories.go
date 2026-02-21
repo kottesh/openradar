@@ -18,7 +18,7 @@ func removeOldRepositoriesFunc(jobContext JobContext) {
 
 			findings, err := db.GetFindingsByRepo(jobContext.DB, repository.RepoName)
 			if err != nil {
-				return
+				continue
 			}
 
 			if len(findings) == 0 { // No Findings!
@@ -32,6 +32,6 @@ func init() {
 	RegisterJob(Job{
 		Name:     "Remove old repositories",
 		Func:     removeOldRepositoriesFunc,
-		Schedule: 30 * time.Minute,
+		Schedule: 12 * time.Hour,
 	})
 }
