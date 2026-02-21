@@ -60,6 +60,7 @@ func GetLatestFindings(page int, pageSize int, provider string, minAge string, d
 			"shopify":     true,
 			"supabase":    true,
 			"telegram":    true,
+			"flavortown":  true,
 		}
 		if !validProviders[provider] {
 			return nil, fmt.Errorf("invalid provider: %s", provider)
