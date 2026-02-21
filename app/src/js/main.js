@@ -72,7 +72,7 @@ function createCard(leak) {
     card.className = 'card';
     card.innerHTML = `
         <div class="card-header">
-            <pre class="card-key"><code>${leak.key}</code></pre>
+            <button class="card-key"><code>${leak.key}</code></button>
             <span class="card-provider-badge ${leak.provider}">${leak.provider}</span>
         </div>
         <div class="card-body">
@@ -94,6 +94,18 @@ function createCard(leak) {
             </div>
         </div>
     `;
+    
+    const code = card.querySelector('.card-key')
+    code.addEventListener('click', () => {
+        navigator.clipboard.writeText(leak.key)
+        code.textContent = "Copied to clipboard."
+        setTimeout(() => {
+            code.textContent = leak.key
+        }, 600)
+        
+    })
+
+
     return card;
 }
 

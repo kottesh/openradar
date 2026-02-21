@@ -285,7 +285,10 @@ body {
         gap: 10px;
     }
 
-    pre.card-key {
+    button.card-key {
+        all: unset;
+        cursor: pointer;
+        
         background-color: var(--bg-surface);
         border: 1px solid var(--border-subtle);
         border-radius: var(--radius-sm);
