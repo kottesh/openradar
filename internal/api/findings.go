@@ -48,7 +48,7 @@ func GetLatestFindings(page int, pageSize int, provider string, minAge string, d
 			"discord":     true,
 			"aws":         true,
 			"asana":       true,
-			"stripe":      false,
+			"stripe":      true,
 			"twilio":      true,
 			"sendgrid":    true,
 			"cloudflare":  true,
