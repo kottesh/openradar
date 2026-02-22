@@ -14,6 +14,13 @@ func TestAllDetectors(t *testing.T) {
 		shouldFind       bool
 	}{
 		{
+			name:             "OpenAI",
+			input:            "sk-pLm8vKqR3nXwT5jYhD2cF9uEoAiBsGz4eN7kVt6rJ0mQpWx",
+			expectedKey:      "sk-pLm8vKqR3nXwT5jYhD2cF9uEoAiBsGz4eN7kVt6rJ0mQpWx",
+			expectedProvider: "openai",
+			shouldFind:       true,
+		},
+		{
 			name:             "Anthropic",
 			input:            "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",
 			expectedKey:      "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",
@@ -177,6 +184,13 @@ func TestAllDetectors(t *testing.T) {
 			input:            "123456789:ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghi",
 			expectedKey:      "123456789:ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghi",
 			expectedProvider: "telegram",
+			shouldFind:       true,
+		},
+		{
+			name:             "Flavortown",
+			input:            "ft_sk_a2e00dfe20983c39940a86ada414319d",
+			expectedKey:      "ft_sk_a2e00dfe20983c39940a86ada414319d",
+			expectedProvider: "flavortown",
 			shouldFind:       true,
 		},
 	}

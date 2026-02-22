@@ -5,7 +5,7 @@ import (
 	"regexp"
 )
 
-var openaiRegex = regexp.MustCompile(`sk-[A-Za-z0-9]{20}T3BlbkFJ[A-Za-z0-9]{20}`)
+var openaiRegex = regexp.MustCompile(`sk-[a-zA-Z0-9]{20,}`)
 
 func OpenAI(src string) (string, bool, string) {
 	key := openaiRegex.FindString(src)

@@ -36,6 +36,14 @@ var allowExt = map[string]struct{}{
 	".ts":   {},
 	".js":   {},
 	".yaml": {},
+	".go":   {},
+	".json": {},
+	".toml": {},
+	".php":  {},
+	".rb":   {},
+	".java": {},
+	".kt":   {},
+	".sh":   {},
 }
 
 func hasTargetExt(name string) bool {
