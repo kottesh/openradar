@@ -150,7 +150,7 @@ func Start(ctx context.Context, conf config.Config, DBtoSaveIn *gorm.DB, Hub *se
 				job.Status = domain.JobStatusCompleted
 				job.UpdatedAt = time.Now()
 
-				if repo.Size <= uint(conf.Scanner.MaxRepoSizeMB)*1000000 {
+				if repo.Size <= uint(conf.Scanner.MaxRepoSizeMB)*1024 {
 					dir, err := os.MkdirTemp("", "openradar-")
 					if err != nil {
 						log.Printf("failed to create temp dir: %v", err)

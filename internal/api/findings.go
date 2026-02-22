@@ -35,6 +35,9 @@ func GetLatestFindings(page int, pageSize int, provider string, minAge string, d
 	query := dbToGrabFrom.Model(&domain.Finding{}).Where("detected_at >= ?", cutOffTime)
 
 	if provider != "*" {
+		// i know hardcoding this DOES seem crazy
+		// however it makes it easier if i ever need to
+		// disable a provider server-side!
 		validProviders := map[string]bool{
 			"anthropic":   true,
 			"cerebras":    true,

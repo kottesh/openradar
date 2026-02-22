@@ -63,4 +63,4 @@ This project is for educational and informational purposes only. The author is n
 
 ## Credits
 
-Built by [@officialmelon](https://github.com/officialmelon). Inspired by [apiradar.live](https://apiradar.live) — check them out!
+Built by [@officialmelon](https://github.com/officialmelon). Inspired by [apiradar.live](https://apiradar.live) - check them out!

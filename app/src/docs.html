@@ -201,6 +201,30 @@
             </div>
         </section>
 
+        <!--/api/leaderboard-->
+        <section class="endpoint-card" id="get-repository-count">
+            <div class="endpoint-header">
+                <span class="method-badge get">GET</span>
+                <span class="endpoint-path">/api/leaderboard</span>
+            </div>
+            <p class="endpoint-desc">Returns the top 3 users based on leak amount</p>
+            <div class="params-section">
+                <div class="param-grid">
+                </div>
+            </div>
+            <div class="response-section">
+                <h3>Response</h3>
+                <pre class="code-block"><code>[
+{
+    "username": "username",
+    "repo_name": "https://api.github.com/repos/user/repo",
+    "leaks": leak_count,
+    "avatar": "https://github.com/username.png"
+  }
+]</code></pre>
+            </div>
+        </section>
+
     </main>
 
 </body>
