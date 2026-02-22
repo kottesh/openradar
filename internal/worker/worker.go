@@ -18,6 +18,7 @@ import (
 	"openradar/internal/domain"
 	"openradar/internal/queue"
 	"openradar/internal/scanner"
+	"openradar/internal/scanner/checks"
 	"openradar/internal/server"
 
 	"openradar/internal/scanner/detectors"
@@ -46,7 +47,7 @@ func hasTargetExt(name string) bool {
 func runAllDetectors(src string, fileName string, scanJobID string, url string, DBtoSaveIn *gorm.DB) {
 	for _, scanFunction := range detectors.AllDetectors {
 		key, found, provider := scanFunction(src)
-		if found && detectors.EnsureKeyIsntSpam(key) {
+		if found && detectors.EnsureKeyIsntSpam(key) && checks.RunCheckForProvider(provider, key) {
 			log.Printf("Match found: %s\n", key)
 			finding := domain.NewFinding(
 				scanJobID,

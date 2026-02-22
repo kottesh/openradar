@@ -1,34 +1,43 @@
 package checks
 
 import (
-	"bytes"
 	"fmt"
 	"net/http"
 )
 
 var anthropic_base string = "https://api.anthropic.com"
 
-func AnthropicCheck(key string) {
+func AnthropicCheck(key string) bool {
 
-	var json = []byte(``)
-
-	req, err := http.NewRequest("POST", anthropic_base+"/v1/models", bytes.NewBuffer(json))
+	req, err := http.NewRequest("GET", anthropic_base+"/v1/models", nil)
 	if err != nil {
 		fmt.Println("Error creating request:", err)
-		return
+		return false
 	}
 
-	req.Header.Set("Authorization", "Bearer "+key)
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+key)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("Error sending request:", err)
-		return
+		return false
 	}
 	defer resp.Body.Close()
 
-	fmt.Println("Response Status:", resp.Status)
+	// no auth
+	if resp.StatusCode == 403 || resp.StatusCode == 401 {
+		return false
+	}
 
+	// is authed
+	return true
+}
+
+func init() {
+	AllChecks = append(AllChecks, Check{
+		Provider: "anthropic",
+		Check:    AnthropicCheck,
+	})
 }

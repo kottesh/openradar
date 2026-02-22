@@ -5,41 +5,40 @@ import (
 	"net/http"
 )
 
-var googleBase string = "https://generativelanguage.googleapis.com"
+var cerebras_base string = "https://api.cerebras.ai"
 
-// Returns whether resp is a 403 or not.
-func Google(key string) bool {
-	req, err := http.NewRequest("GET", googleBase+"/v1beta/models?key="+key, nil)
+func Cerebras(key string) bool {
+
+	req, err := http.NewRequest("GET", cerebras_base+"/v1/models", nil)
+
 	if err != nil {
 		fmt.Println("Error creating request:", err)
 		return false
 	}
 
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+key)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("Error sending request:", err)
+		fmt.Println("Error send request:", err)
 		return false
 	}
 	defer resp.Body.Close()
 
-	//ikik we should be retrying/rechecking etc if we get a bad response
-	//but i dont think we really need to tbh lmao
-
-	// no auth
+	// no authorization
 	if resp.StatusCode == 403 || resp.StatusCode == 401 {
 		return false
 	}
 
-	// is authed
+	// auth
 	return true
 }
 
 func init() {
 	AllChecks = append(AllChecks, Check{
-		Provider: "google",
-		Check:    Google,
+		Provider: "cerebras",
+		Check:    Cerebras,
 	})
 }

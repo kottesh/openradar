@@ -5,17 +5,17 @@ import (
 	"net/http"
 )
 
-var googleBase string = "https://generativelanguage.googleapis.com"
+var groq_base string = "https://api.groq.com"
 
-// Returns whether resp is a 403 or not.
-func Google(key string) bool {
-	req, err := http.NewRequest("GET", googleBase+"/v1beta/models?key="+key, nil)
+func Groq(key string) bool {
+	req, err := http.NewRequest("GET", groq_base+"/openai/v1/models", nil)
 	if err != nil {
 		fmt.Println("Error creating request:", err)
 		return false
 	}
 
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+key)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -25,21 +25,18 @@ func Google(key string) bool {
 	}
 	defer resp.Body.Close()
 
-	//ikik we should be retrying/rechecking etc if we get a bad response
-	//but i dont think we really need to tbh lmao
-
 	// no auth
 	if resp.StatusCode == 403 || resp.StatusCode == 401 {
 		return false
 	}
 
-	// is authed
+	// auth
 	return true
 }
 
 func init() {
 	AllChecks = append(AllChecks, Check{
-		Provider: "google",
-		Check:    Google,
+		Provider: "groq",
+		Check:    Groq,
 	})
 }
