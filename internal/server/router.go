@@ -39,20 +39,6 @@ type Hub struct {
 	Broadcast chan []byte
 }
 
-// hardcoded (TODO: FIX THIS FUTURE ME!) :scary:
-var allowedOrigins = map[string]bool{
-	"https://open-radar.live": true,
-	"http://localhost:5173":   true,
-	"http://localhost:8080":   true,
-}
-
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool { // TODO
-		origin := r.Header.Get("Origin")
-		return allowedOrigins[origin]
-	},
-}
-
 func newHub() *Hub {
 	return &Hub{
 		clients:   make(map[*websocket.Conn]bool),
@@ -159,6 +145,13 @@ func remoteIP(r *http.Request) string {
 
 func StartServer(db *gorm.DB, cfg config.Config) *Hub {
 	router := chi.NewRouter()
+
+	var upgrader = websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			origin := r.Header.Get("Origin")
+			return cfg.HTTP.AllowedOrigins[origin]
+		},
+	}
 
 	ipl := newIPLimiter()
 	rateLimitMiddleware := func(next http.Handler) http.Handler {

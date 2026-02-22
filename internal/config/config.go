@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -13,7 +14,8 @@ type Config struct {
 	Env string
 
 	HTTP struct {
-		Port string
+		Port           string
+		AllowedOrigins map[string]bool
 	}
 
 	Database struct {
@@ -50,9 +52,20 @@ func Load() Config {
 	cfg.GitHub.Key = required("GITHUB_TOKEN")
 
 	cfg.HTTP.Port = required("PORT")
+	cfg.HTTP.AllowedOrigins = parseOrigins(required("ALLOWED_WEBSOCKET_ORIGINS"))
 
 	validate(cfg)
 	return cfg
+}
+
+func parseOrigins(val string) map[string]bool {
+	origins := map[string]bool{}
+	for _, origin := range strings.Split(val, ",") {
+		if o := strings.TrimSpace(origin); o != "" {
+			origins[o] = true
+		}
+	}
+	return origins
 }
 
 func getEnv(key, fallback string) string {

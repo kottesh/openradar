@@ -43,8 +43,8 @@ go mod download
 
 Copy the example `.env` file and fill in your credentials:
 
-- `DATABASE_URL` — your PostgreSQL connection string
-- `GITHUB_TOKEN` — generate one from [GitHub Developer Settings](https://github.com/settings/tokens)
+- `DATABASE_URL` - your PostgreSQL connection string
+- `GITHUB_TOKEN` - generate one from [GitHub Developer Settings](https://github.com/settings/tokens)
 
 **4. Start the server**
 ```bash
@@ -63,4 +63,9 @@ This project is for educational and informational purposes only. The author is n
 
 ## Credits
 
+<<<<<<< HEAD
 Built by [@officialmelon](https://github.com/officialmelon). Inspired by [apiradar.live](https://apiradar.live) - check them out!
+=======
+
+Built by [@officialmelon](https://github.com/officialmelon). Inspired by [apiradar.live](https://apiradar.live) — check them out!
+>>>>>>> 9482d56e86814e04c2d72d34dd7a6a9318d6c1bc
