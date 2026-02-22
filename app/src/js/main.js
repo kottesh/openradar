@@ -69,10 +69,14 @@ function createCard(leak) {
     const { displayName, publicUrl } = repoDisplayName(leak.repo_name);
     const fileUrl = `${publicUrl}/blob/main/${leak.file_path}`;
     const card = document.createElement('article');
+    const keytrim = leak.key.length > 40
+    ? key.substring(0, 40) + "..."
+    : key;
+
     card.className = 'card';
     card.innerHTML = `
         <div class="card-header">
-            <button class="card-key"><code>${leak.key}</code></button>
+            <button class="card-key"><code>${keytrim}</code></button>
             <span class="card-provider-badge ${leak.provider}">${leak.provider}</span>
         </div>
         <div class="card-body">
