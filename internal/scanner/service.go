@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"openradar/internal/domain"
@@ -79,9 +80,17 @@ func ScanJob(ctx context.Context, GITHUB_TOKEN string) ([]Event, error) {
 
 	defer res.Body.Close()
 
+	if res.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(res.Body)
+		log.Printf("rate limit remaining: %s, resets: %s",
+			res.Header.Get("X-RateLimit-Remaining"),
+			res.Header.Get("X-RateLimit-Reset"))
+		return nil, fmt.Errorf("github returned status %d: %s", res.StatusCode, string(body))
+	}
+
 	var events []Event
 	if err := json.NewDecoder(res.Body).Decode(&events); err != nil {
-		return nil, fmt.Errorf("json decode failed")
+		return nil, fmt.Errorf("json decode failed: %w", err)
 	}
 
 	cleanupRecentlyScanned()
