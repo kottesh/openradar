@@ -193,6 +193,13 @@ func TestAllDetectors(t *testing.T) {
 			expectedProvider: "flavortown",
 			shouldFind:       true,
 		},
+		{
+			name:             "Discord",
+			input:            "MTExODk2NzQyMDY4NDE2MjU2.GxkTqP.vR8mN3kL9pQwXjY2nDcF5hEoAiBsGz4eN7kV",
+			expectedKey:      "MTExODk2NzQyMDY4NDE2MjU2.GxkTqP.vR8mN3kL9pQwXjY2nDcF5hEoAiBsGz4eN7kV",
+			expectedProvider: "discord",
+			shouldFind:       true,
+		},
 	}
 
 	for _, tc := range testCases {
