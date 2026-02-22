@@ -65,7 +65,7 @@ func cleanupRecentlyScanned() {
 }
 
 func ScanJob(ctx context.Context, GITHUB_TOKEN string) ([]Event, error) {
-	req, err := http.NewRequestWithContext(ctx, "GET", GITHUB_ENDPOINT+"/events", nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", GITHUB_ENDPOINT+"/events?per_page=100", nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create req: %w", err)
 	}
@@ -122,6 +122,7 @@ func ScanRepo(ctx context.Context, URL string, GITHUB_TOKEN string) (ScannedRepo
 	var repo ScannedRepository
 	if err := json.NewDecoder(res.Body).Decode(&repo); err != nil {
 		log.Printf("json decode failed")
+		return ScannedRepository{}, err
 	}
 
 	return repo, nil

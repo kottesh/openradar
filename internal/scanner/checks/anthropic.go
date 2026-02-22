@@ -16,7 +16,7 @@ func AnthropicCheck(key string) bool {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+key)
+	req.Header.Set("x-api-key", key)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)

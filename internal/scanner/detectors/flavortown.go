@@ -5,7 +5,7 @@ import (
 	"regexp"
 )
 
-var ftKey = regexp.MustCompile(`^ft_sk_[a-f0-9]{32}$`)
+var ftKey = regexp.MustCompile(`ft_sk_[a-f0-9]{32}`)
 
 func Flavortown(src string) (string, bool, string) {
 	Key := ftKey.FindString(src)

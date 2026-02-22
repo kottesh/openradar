@@ -17,6 +17,6 @@ func init() {
 	RegisterJob(Job{
 		Name:     "Scan for new repositories (/live)",
 		Func:     scanJobFunc,
-		Schedule: 35 * time.Second,
+		Schedule: 20 * time.Second,
 	})
 }
