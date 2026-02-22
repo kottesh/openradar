@@ -69,14 +69,14 @@ function createCard(leak) {
     const { displayName, publicUrl } = repoDisplayName(leak.repo_name);
     const fileUrl = `${publicUrl}/blob/main/${leak.file_path}`;
     const card = document.createElement('article');
-    const keytrim = leak.key.length > 40
-        ? leak.key.substring(0, 40) + "..."
-        : leak.key;
+    const filetrim = leak.file_path.length > 80
+        ? leak.file_path.substring(0, 80) + "..."
+        : leak.file_path;
 
     card.className = 'card';
     card.innerHTML = `
         <div class="card-header">
-            <button class="card-key"><code>${keytrim}</code></button>
+            <button class="card-key"><code>${leak.key}</code></button>
             <span class="card-provider-badge ${leak.provider}">${leak.provider}</span>
         </div>
         <div class="card-body">
@@ -88,7 +88,7 @@ function createCard(leak) {
             <div class="card-row card-filepath">
                 <img src="/file.svg" class="icon" alt="File icon" />
                 <span>Key path:</span>
-                <a href="${fileUrl}" target="_blank" rel="noopener noreferrer" class="path">${leak.file_path}</a>
+                <a href="${fileUrl}" target="_blank" rel="noopener noreferrer" class="path">${filetrim}</a>
             </div>
             <div class="card-row card-detected">
                 <div class="card-meta-item">
