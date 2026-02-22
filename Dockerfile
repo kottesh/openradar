@@ -5,7 +5,7 @@ WORKDIR /app/frontend
 COPY app/package*.json ./
 RUN npm install
 
-COPY app . ./
+COPY app/ ./
 RUN npm run build
 
 
@@ -32,9 +32,10 @@ RUN apk add --no-cache ca-certificates git
 
 COPY --from=go-builder /app/server .
 
-EXPOSE 8080
+ENV PORT=8080
+EXPOSE ${PORT}
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:8080/ || exit 1
+    CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT}/ || exit 1
 
 CMD ["./server"]

@@ -7,10 +7,9 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"gorm.io/gorm"
 )
 
-func InitLeaderboard(router chi.Router, db *gorm.DB, distFS fs.FS) {
+func InitLeaderboard(router chi.Router, distFS fs.FS) {
 	// This returns top 3 users (top 3 meaning most leaked keys from them)
 	router.Get("/api/leaderboard", func(w http.ResponseWriter, r *http.Request) {
 		findings := api.GetLeaderboardData()

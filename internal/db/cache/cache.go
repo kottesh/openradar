@@ -29,8 +29,8 @@ func GetRepositoriesCount() int64 {
 }
 
 func SetRepositoriesCount(n int64) {
-	countsMu.RLock()
-	defer countsMu.RUnlock()
+	countsMu.Lock()
+	defer countsMu.Unlock()
 	repositoriesCount = n
 }
 
@@ -41,7 +41,7 @@ func GetFindingsCount() int64 {
 }
 
 func SetFindingsCount(n int64) {
-	countsMu.RLock()
-	defer countsMu.RUnlock()
+	countsMu.Lock()
+	defer countsMu.Unlock()
 	findingsCount = n
 }

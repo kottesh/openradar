@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -20,6 +21,7 @@ import (
 	"openradar/internal/scanner"
 	"openradar/internal/scanner/checks"
 	"openradar/internal/server"
+	"openradar/internal/webhook"
 
 	"openradar/internal/scanner/detectors"
 
@@ -52,7 +54,7 @@ func hasTargetExt(name string) bool {
 	return ok
 }
 
-func runAllDetectors(src string, fileName string, scanJobID string, url string, DBtoSaveIn *gorm.DB) {
+func runAllDetectors(src string, fileName string, scanJobID string, url string, DBtoSaveIn *gorm.DB, conf config.Config) {
 	for _, scanFunction := range detectors.AllDetectors {
 		key, found, provider := scanFunction(src)
 		if found && detectors.EnsureKeyIsntSpam(key) && checks.RunCheckForProvider(provider, key) {
@@ -64,10 +66,15 @@ func runAllDetectors(src string, fileName string, scanJobID string, url string, 
 				key,
 				provider,
 			)
-			checkedFinding, err := db.GetFindingByKey(key, DBtoSaveIn)
-			_ = checkedFinding
+			_, err := db.GetFindingByKey(key, DBtoSaveIn)
 
 			if err != nil {
+				webhook.SendHook(conf.HTTP.Webhook, webhook.WebhookData{
+					Key:      key,
+					Provider: provider,
+					FilePath: fileName,
+					RepoUrl:  strings.Replace(url, "api.github.com/repos", "github.com", 1),
+				})
 				if err := db.AddFinding(finding, DBtoSaveIn); err != nil {
 					log.Printf("Failed to save finding for key %s: %v\n", key, err)
 				}
@@ -77,6 +84,9 @@ func runAllDetectors(src string, fileName string, scanJobID string, url string, 
 }
 
 func cloneRepo(ctx context.Context, cloneURL string, dir string) error {
+	if !strings.HasPrefix(cloneURL, "https://") {
+		return fmt.Errorf("malicious clone url? %s", cloneURL)
+	}
 	cmd := exec.CommandContext(ctx, "git", "clone", "--depth", "1", "--single-branch", cloneURL, dir)
 	cmd.Stdout = nil
 	cmd.Stderr = nil
@@ -126,7 +136,7 @@ func scanClonedFiles(dir string, scanJobID string, url string, DBtoSaveIn *gorm.
 		}
 
 		relPath, _ := filepath.Rel(dir, path)
-		runAllDetectors(buf.String(), relPath, scanJobID, url, DBtoSaveIn)
+		runAllDetectors(buf.String(), relPath, scanJobID, url, DBtoSaveIn, conf)
 		return nil
 	})
 }

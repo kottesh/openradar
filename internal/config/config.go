@@ -16,6 +16,7 @@ type Config struct {
 	HTTP struct {
 		Port           string
 		AllowedOrigins map[string]bool
+		Webhook        string
 	}
 
 	Database struct {
@@ -52,6 +53,8 @@ func Load() Config {
 	cfg.GitHub.Key = required("GITHUB_TOKEN")
 
 	cfg.HTTP.Port = required("PORT")
+	cfg.HTTP.Webhook = getEnv("WEBHOOK_URL", "")
+
 	cfg.HTTP.AllowedOrigins = parseOrigins(required("ALLOWED_WEBSOCKET_ORIGINS"))
 
 	validate(cfg)

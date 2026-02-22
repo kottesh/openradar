@@ -5,10 +5,9 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"gorm.io/gorm"
 )
 
-func InitDocumentation(router chi.Router, db *gorm.DB, distFS fs.FS) {
+func InitDocumentation(router chi.Router, distFS fs.FS) {
 	// This returns the page for the docs
 	router.Get("/docs", func(w http.ResponseWriter, r *http.Request) {
 		f, err := distFS.Open("docs.html")

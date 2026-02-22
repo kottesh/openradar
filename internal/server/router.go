@@ -235,8 +235,8 @@ func StartServer(db *gorm.DB, cfg config.Config) *Hub {
 
 	InitRepositories(router, db)
 	InitFindings(router, db)
-	InitLeaderboard(router, db, distFS)
-	InitDocumentation(router, db, distFS)
+	InitLeaderboard(router, distFS)
+	InitDocumentation(router, distFS)
 
 	fileServer := http.FileServer(http.FS(distFS))
 
