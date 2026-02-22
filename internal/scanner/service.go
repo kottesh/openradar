@@ -81,7 +81,7 @@ func ScanJob(ctx context.Context, GITHUB_TOKEN string) ([]Event, error) {
 
 	var events []Event
 	if err := json.NewDecoder(res.Body).Decode(&events); err != nil {
-		log.Printf("json decode failed")
+		return nil, fmt.Errorf("json decode failed")
 	}
 
 	cleanupRecentlyScanned()
