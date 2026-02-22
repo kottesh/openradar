@@ -43,8 +43,8 @@ go mod download
 
 Copy the example `.env` file and fill in your credentials:
 
-- `DATABASE_URL` — your PostgreSQL connection string
-- `GITHUB_TOKEN` — generate one from [GitHub Developer Settings](https://github.com/settings/tokens)
+- `DATABASE_URL` - your PostgreSQL connection string
+- `GITHUB_TOKEN` - generate one from [GitHub Developer Settings](https://github.com/settings/tokens)
 
 **4. Start the server**
 ```bash
@@ -62,5 +62,6 @@ Full API docs are available at [open-radar.live/docs](https://open-radar.live/do
 This project is for educational and informational purposes only. The author is not liable for any misuse or damage arising from this tool.
 
 ## Credits
+
 
 Built by [@officialmelon](https://github.com/officialmelon). Inspired by [apiradar.live](https://apiradar.live) — check them out!
