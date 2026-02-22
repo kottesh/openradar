@@ -35,12 +35,12 @@ func cache_count_queries(jobContext JobContext) {
 
 	count, err := get_finding(db)
 	if err == nil {
-		cache.FindingsCount = count
+		cache.SetFindingsCount(count)
 	}
 
 	count2, err := get_repository(db)
 	if err == nil {
-		cache.RepositoriesCount = count2
+		cache.SetRepositoriesCount(count2)
 	}
 }
 

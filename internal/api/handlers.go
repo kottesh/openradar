@@ -15,9 +15,9 @@ func GetLeaderboardData() []domain.LeaderboardEntry {
 }
 
 func GetFindingsCount() int64 {
-	return cache.FindingsCount
+	return cache.GetFindingsCount()
 }
 
 func GetRepositoriesCount() int64 {
-	return cache.RepositoriesCount
+	return cache.GetRepositoriesCount()
 }

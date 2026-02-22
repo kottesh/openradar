@@ -88,6 +88,9 @@ func ScanJob(ctx context.Context, GITHUB_TOKEN string) ([]Event, error) {
 
 	recentlyScannedMu.Lock()
 	for _, x := range events {
+		if x.Type != "PushEvent" { // if pushing/commiting.
+			continue
+		}
 		if _, seen := recentlyScanned[x.Repo.URL]; seen {
 			continue
 		}
