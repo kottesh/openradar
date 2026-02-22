@@ -106,6 +106,9 @@ func scanClonedFiles(dir string, scanJobID string, url string, DBtoSaveIn *gorm.
 			if d.Name() == ".git" {
 				return filepath.SkipDir
 			}
+			if d.Name() == "node_modules" {
+				return filepath.SkipDir
+			}
 			return nil
 		}
 
