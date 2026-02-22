@@ -35,13 +35,13 @@ func SetRepositoriesCount(n int64) {
 }
 
 func GetFindingsCount() int64 {
-	countsMu.RUnlock()
+	countsMu.RLock()
 	defer countsMu.RUnlock()
 	return findingsCount
 }
 
 func SetFindingsCount(n int64) {
-	countsMu.Unlock()
+	countsMu.RLock()
 	defer countsMu.RUnlock()
 	findingsCount = n
 }
