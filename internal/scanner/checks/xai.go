@@ -23,6 +23,7 @@ func Xai(key string) bool {
 		fmt.Println("Error sending request:", err)
 		return false
 	}
+	defer resp.Body.Close()
 
 	// no auth
 	if resp.StatusCode == 403 || resp.StatusCode == 401 {

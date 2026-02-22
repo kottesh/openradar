@@ -22,6 +22,7 @@ func Asana(key string) bool {
 	resp, err := client.Do(request)
 	if err != nil {
 		fmt.Println("Error sending request:", err)
+		return false
 	}
 	defer resp.Body.Close()
 

@@ -11,6 +11,7 @@ func Openrouter(key string) bool {
 	req, err := http.NewRequest("POST", openrouter_base+"/v1/models", nil)
 	if err != nil {
 		fmt.Println("Error creating request:", err)
+		return false
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -20,6 +21,7 @@ func Openrouter(key string) bool {
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("Error sending request:", err)
+		return false
 	}
 	defer resp.Body.Close()
 

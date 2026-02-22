@@ -8,7 +8,7 @@ import (
 var npm_base string = "https://registry.npmjs.org"
 
 func npm(key string) bool {
-	req, err := http.NewRequest("GET", npm_base, nil)
+	req, err := http.NewRequest("GET", npm_base+"/-/whoami", nil)
 	if err != nil {
 		fmt.Println("Error creating request:", err)
 		return false

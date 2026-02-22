@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-var discord_base string = "https://discordapp.com/api"
+var discord_base string = "https://discord.com/api"
 
 func Discord(key string) bool {
 

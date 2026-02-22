@@ -8,7 +8,7 @@ import (
 var cloudflare_base string = "https://api.cloudflare.com"
 
 func Cloudflare(key string) bool {
-	req, err := http.NewRequest("GET", cloudflare_base+"client/v4/user/tokens/verify", nil)
+	req, err := http.NewRequest("GET", cloudflare_base+"/client/v4/user/tokens/verify", nil)
 	if err != nil {
 		fmt.Println("Err creating request:", err)
 		return false
@@ -35,7 +35,7 @@ func Cloudflare(key string) bool {
 
 func init() {
 	AllChecks = append(AllChecks, Check{
-		Provider: "github",
+		Provider: "cloudflare",
 		Check:    Cloudflare,
 	})
 }
