@@ -126,3 +126,12 @@ func DeleteRepository(scanJobID string, db *gorm.DB) error {
 	}
 	return nil
 }
+
+// Remove Finding
+func DeleteFinding(scanJobID string, db *gorm.DB) error {
+	result := db.Where("scan_job_id = ?", scanJobID).Delete(&domain.Finding{})
+	if result.Error != nil {
+		return fmt.Errorf("failed to delete repository: %w", result.Error)
+	}
+	return nil
+}
