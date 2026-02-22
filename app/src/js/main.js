@@ -70,8 +70,8 @@ function createCard(leak) {
     const fileUrl = `${publicUrl}/blob/main/${leak.file_path}`;
     const card = document.createElement('article');
     const keytrim = leak.key.length > 40
-    ? key.substring(0, 40) + "..."
-    : key;
+        ? leak.key.substring(0, 40) + "..."
+        : leak.key;
 
     card.className = 'card';
     card.innerHTML = `
@@ -98,7 +98,7 @@ function createCard(leak) {
             </div>
         </div>
     `;
-    
+
     const code = card.querySelector('.card-key')
     code.addEventListener('click', () => {
         navigator.clipboard.writeText(leak.key)
@@ -106,7 +106,7 @@ function createCard(leak) {
         setTimeout(() => {
             code.textContent = leak.key
         }, 600)
-        
+
     })
 
 
