@@ -275,7 +275,7 @@ function addTickerItem(url) {
 }
 
 function connectWebSocket() {
-    const protocol = location.protocol === 'https' ? 'wss:' : 'ws:';
+    const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
     const ws = new WebSocket(`${protocol}//${location.host}/ws/live`);
     ws.onmessage = e => {
         try { addTickerItem(JSON.parse(e.data).url); } catch { }
