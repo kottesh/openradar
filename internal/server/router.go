@@ -39,9 +39,17 @@ type Hub struct {
 	Broadcast chan []byte
 }
 
+// hardcoded (TODO: FIX THIS FUTURE ME!) :scary:
+var allowedOrigins = map[string]bool{
+	"https://open-radar.live": true,
+	"http://localhost:5173":   true,
+	"http://localhost:8080":   true,
+}
+
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { // TODO
-		return true
+		origin := r.Header.Get("Origin")
+		return allowedOrigins[origin]
 	},
 }
 
