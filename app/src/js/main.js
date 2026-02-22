@@ -69,8 +69,8 @@ function createCard(leak) {
     const { displayName, publicUrl } = repoDisplayName(leak.repo_name);
     const fileUrl = `${publicUrl}/blob/main/${leak.file_path}`;
     const card = document.createElement('article');
-    const filetrim = leak.file_path.length > 65
-        ? leak.file_path.substring(0, 65) + "..."
+    const filetrim = leak.file_path.length > 55
+        ? leak.file_path.substring(0, 55) + "..."
         : leak.file_path;
 
     card.className = 'card';
