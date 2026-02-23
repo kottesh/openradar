@@ -29,7 +29,7 @@ func Google(key string) bool {
 	//but i dont think we really need to tbh lmao
 
 	// no auth
-	if resp.StatusCode == 403 || resp.StatusCode == 401 {
+	if resp.StatusCode != 200 && resp.StatusCode != 202 {
 		return false
 	}
 
