@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="readme/or_logo.png" alt="OpenRadar Logo" width="120">
+  <img src="readme/banner.png" alt="OpenRadar Banner" width="920">
 </p>
 
 <h1 align="center">OpenRadar</h1>
