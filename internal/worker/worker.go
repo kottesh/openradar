@@ -1,17 +1,11 @@
 package worker
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
-	"io"
 	"log"
 	"os"
-	"os/exec"
-	"path/filepath"
 	"runtime/debug"
-	"strings"
 	"time"
 
 	"openradar/internal/config"
@@ -19,130 +13,116 @@ import (
 	"openradar/internal/domain"
 	"openradar/internal/queue"
 	"openradar/internal/scanner"
-	"openradar/internal/scanner/checks"
 	"openradar/internal/server"
-	"openradar/internal/webhook"
-
-	"openradar/internal/scanner/detectors"
 
 	"gorm.io/gorm"
 )
 
-var allowExt = map[string]struct{}{
-	".env":  {},
-	".md":   {},
-	".txt":  {},
-	".py":   {},
-	".rs":   {},
-	".yml":  {},
-	".ts":   {},
-	".js":   {},
-	".yaml": {},
-	".go":   {},
-	".json": {},
-	".toml": {},
-	".php":  {},
-	".rb":   {},
-	".java": {},
-	".kt":   {},
-	".sh":   {},
-}
+// var allowExt = map[string]struct{}{
+// 	".env":  {},
+// 	".md":   {},
+// 	".txt":  {},
+// 	".py":   {},
+// 	".rs":   {},
+// 	".yml":  {},
+// 	".ts":   {},
+// 	".js":   {},
+// 	".yaml": {},
+// 	".go":   {},
+// 	".json": {},
+// 	".toml": {},
+// 	".php":  {},
+// 	".rb":   {},
+// 	".java": {},
+// 	".kt":   {},
+// 	".sh":   {},
+// }
 
-func hasTargetExt(name string) bool {
-	ext := strings.ToLower(filepath.Ext(name))
-	_, ok := allowExt[ext]
-	return ok
-}
+// func hasTargetExt(name string) bool {
+// 	ext := strings.ToLower(filepath.Ext(name))
+// 	_, ok := allowExt[ext]
+// 	return ok
+// }
 
-func runAllDetectors(src string, fileName string, scanJobID string, url string, DBtoSaveIn *gorm.DB, conf config.Config) {
-	for _, scanFunction := range detectors.AllDetectors {
-		key, found, provider := scanFunction(src)
-		if found && detectors.EnsureKeyIsntSpam(key) && checks.RunCheckForProvider(provider, key) {
-			log.Printf("Match found: %s\n", key)
-			finding := domain.NewFinding(
-				scanJobID,
-				url,
-				fileName,
-				key,
-				provider,
-			)
-			_, err := db.GetFindingByKey(key, DBtoSaveIn)
+// func runAllDetectors(src string, fileName string, scanJobID string, url string, DBtoSaveIn *gorm.DB, conf config.Config) {
+// 	for _, scanFunction := range detectors.AllDetectors {
+// 		key, found, provider := scanFunction(src)
+// 		if found && detectors.EnsureKeyIsntSpam(key) && checks.RunCheckForProvider(provider, key) {
+// 			log.Printf("Match found: %s\n", key)
+// 			finding := domain.NewFinding(
+// 				scanJobID,
+// 				url,
+// 				fileName,
+// 				key,
+// 				provider,
+// 			)
+// 			_, err := db.GetFindingByKey(key, DBtoSaveIn)
 
-			if err != nil {
-				webhook.SendHook(conf.HTTP.Webhook, webhook.WebhookData{
-					Key:      key,
-					Provider: provider,
-					FilePath: fileName,
-					RepoUrl:  strings.Replace(url, "api.github.com/repos", "github.com", 1),
-				})
-				if err := db.AddFinding(finding, DBtoSaveIn); err != nil {
-					log.Printf("Failed to save finding for key %s: %v\n", key, err)
-				}
-			}
-		}
-	}
-}
+// 			if err != nil {
+// 				webhook.SendHook(conf.HTTP.Webhook, webhook.WebhookData{
+// 					Key:      key,
+// 					Provider: provider,
+// 					FilePath: fileName,
+// 					RepoUrl:  strings.Replace(url, "api.github.com/repos", "github.com", 1),
+// 				})
+// 				if err := db.AddFinding(finding, DBtoSaveIn); err != nil {
+// 					log.Printf("Failed to save finding for key %s: %v\n", key, err)
+// 				}
+// 			}
+// 		}
+// 	}
+// }
 
-func cloneRepo(ctx context.Context, cloneURL string, dir string) error {
-	if !strings.HasPrefix(cloneURL, "https://") {
-		return fmt.Errorf("malicious clone url? %s", cloneURL)
-	}
-	cmd := exec.CommandContext(ctx, "git", "clone", "--depth", "1", "--single-branch", cloneURL, dir)
-	cmd.Stdout = nil
-	cmd.Stderr = nil
-	return cmd.Run()
-}
+// func scanClonedFiles(dir string, scanJobID string, url string, DBtoSaveIn *gorm.DB, conf config.Config) error {
+// 	var buf bytes.Buffer
+// 	maxSize := int64(conf.Scanner.MaxFileSizeKB * 1024)
 
-func scanClonedFiles(dir string, scanJobID string, url string, DBtoSaveIn *gorm.DB, conf config.Config) error {
-	var buf bytes.Buffer
-	maxSize := int64(conf.Scanner.MaxFileSizeKB * 1024)
+// 	return filepath.WalkDir(dir, func(path string, d os.DirEntry, err error) error {
+// 		if err != nil {
+// 			return nil
+// 		}
 
-	return filepath.WalkDir(dir, func(path string, d os.DirEntry, err error) error {
-		if err != nil {
-			return nil
-		}
+// 		if d.IsDir() {
+// 			if d.Name() == ".git" {
+// 				return filepath.SkipDir
+// 			}
+// 			if d.Name() == "node_modules" {
+// 				return filepath.SkipDir
+// 			}
+// 			return nil
+// 		}
 
-		if d.IsDir() {
-			if d.Name() == ".git" {
-				return filepath.SkipDir
-			}
-			if d.Name() == "node_modules" {
-				return filepath.SkipDir
-			}
-			return nil
-		}
+// 		if !hasTargetExt(d.Name()) {
+// 			return nil
+// 		}
 
-		if !hasTargetExt(d.Name()) {
-			return nil
-		}
+// 		info, err := d.Info()
+// 		if err != nil {
+// 			return nil
+// 		}
 
-		info, err := d.Info()
-		if err != nil {
-			return nil
-		}
+// 		if info.Size() > maxSize {
+// 			log.Printf("skipping file %s because it is too large (%d KB)", d.Name(), info.Size()/1024)
+// 			return nil
+// 		}
 
-		if info.Size() > maxSize {
-			log.Printf("skipping file %s because it is too large (%d KB)", d.Name(), info.Size()/1024)
-			return nil
-		}
+// 		f, err := os.Open(path)
+// 		if err != nil {
+// 			return nil
+// 		}
 
-		f, err := os.Open(path)
-		if err != nil {
-			return nil
-		}
+// 		buf.Reset()
+// 		_, err = io.Copy(&buf, f)
+// 		f.Close()
+// 		if err != nil {
+// 			return nil
+// 		}
 
-		buf.Reset()
-		_, err = io.Copy(&buf, f)
-		f.Close()
-		if err != nil {
-			return nil
-		}
-
-		relPath, _ := filepath.Rel(dir, path)
-		runAllDetectors(buf.String(), relPath, scanJobID, url, DBtoSaveIn, conf)
-		return nil
-	})
-}
+// 		relPath, _ := filepath.Rel(dir, path)
+// 		runAllDetectors(buf.String(), relPath, scanJobID, url, DBtoSaveIn, conf)
+// 		return nil
+// 	})
+// }
 
 func Start(ctx context.Context, conf config.Config, DBtoSaveIn *gorm.DB, Hub *server.Hub) {
 	go func() {
@@ -154,15 +134,18 @@ func Start(ctx context.Context, conf config.Config, DBtoSaveIn *gorm.DB, Hub *se
 				log.Printf("Starting to process scan job %s for repository %s", job.ID, job.RepositoryURL)
 
 				job.Status = domain.JobStatusInProgress
+				// Scan!
 				repo, err := scanner.ScanRepo(context.Background(), job.RepositoryURL, conf.GitHub.Key)
 				if err != nil {
 					log.Printf("failed to scan repo %s: %v", job.RepositoryURL, err)
 					continue
 				}
 
+				// Job stuff.
 				job.Status = domain.JobStatusCompleted
 				job.UpdatedAt = time.Now()
 
+				// Check repository should be scanned
 				if repo.Size <= uint(conf.Scanner.MaxRepoSizeMB)*1024 {
 					dir, err := os.MkdirTemp("", "openradar-")
 					if err != nil {
@@ -181,21 +164,46 @@ func Start(ctx context.Context, conf config.Config, DBtoSaveIn *gorm.DB, Hub *se
 						job.RepositoryURL,
 					)
 
+					// Clone the repository
 					cloneCtx, cloneCancel := context.WithTimeout(ctx, 60*time.Second)
-					err = cloneRepo(cloneCtx, repo.Clone_Url, dir)
+					err = CloneRepo(cloneCtx, repo.Clone_Url, dir)
 					cloneCancel()
+
+					// Handle errors
 					if err != nil {
+
 						os.RemoveAll(dir)
 						log.Printf("failed to clone repo %s: %v", job.RepositoryURL, err)
 						continue
 					}
 
-					if err := scanClonedFiles(dir, job.ID, job.RepositoryURL, DBtoSaveIn, conf); err != nil {
-						log.Printf("error while scanning files: %v", err)
+					// Get scanned file results
+					results, err := ScanFiles(dir, conf)
+					if err != nil {
+						continue
 					}
 
+					// Go through all the files!
+					for _, file := range results {
+
+						// Run through all the detectors
+						for _, result := range RunAllDetectors(file.Content, file.RelPath, repo.Url, DBtoSaveIn) {
+
+							// Save the key!
+							SaveKey(*domain.NewFinding(
+								addedRepo.ScanJobID,
+								repo.Url,
+								file.RelPath,
+								result.Key,
+								result.Provider,
+							), DBtoSaveIn, conf)
+						}
+					}
+
+					// Remove the repository files.
 					os.RemoveAll(dir)
 
+					// Save the repository!
 					existingRepo, err := db.GetRepositoryByName(job.RepositoryURL, DBtoSaveIn)
 					_ = existingRepo
 
@@ -210,6 +218,7 @@ func Start(ctx context.Context, conf config.Config, DBtoSaveIn *gorm.DB, Hub *se
 					}
 				}
 
+				// Free memory
 				debug.FreeOSMemory()
 
 				log.Printf("Finished processing scan job %s", repo.Url)
