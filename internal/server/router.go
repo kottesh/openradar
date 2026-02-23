@@ -23,6 +23,8 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+var startTime time.Time
+
 type ipLimiter struct {
 	mu       sync.Mutex
 	limiters map[string]*visitorLimiter
@@ -143,6 +145,10 @@ func remoteIP(r *http.Request) string {
 	return ip
 }
 
+func getUptime() time.Duration {
+	return time.Since(startTime)
+}
+
 func StartServer(db *gorm.DB, cfg config.Config) *Hub {
 	router := chi.NewRouter()
 
@@ -164,6 +170,9 @@ func StartServer(db *gorm.DB, cfg config.Config) *Hub {
 			next.ServeHTTP(w, r)
 		})
 	}
+
+	// Set time
+	startTime = time.Now()
 
 	// Setup middleware
 	router.Use(middleware.Logger)
@@ -237,6 +246,7 @@ func StartServer(db *gorm.DB, cfg config.Config) *Hub {
 	InitFindings(router, db)
 	InitLeaderboard(router, distFS)
 	InitDocumentation(router, distFS)
+	InitStats(router)
 
 	fileServer := http.FileServer(http.FS(distFS))
 
