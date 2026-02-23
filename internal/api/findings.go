@@ -11,6 +11,8 @@ import (
 )
 
 func GetLatestFindings(page int, pageSize int, provider string, minAge string, dbToGrabFrom *gorm.DB) (*domain.PaginatedFindings, error) {
+	// API Validations
+
 	if page < 1 {
 		return nil, fmt.Errorf("page must be greater than 0")
 	}
@@ -32,8 +34,7 @@ func GetLatestFindings(page int, pageSize int, provider string, minAge string, d
 	var findings []domain.Finding
 	var totalCount int64
 
-	query := dbToGrabFrom.Model(&domain.Finding{}).Where("detected_at >= ?", cutOffTime)
-
+	// Provider Validation
 	if provider != "*" {
 		// i know hardcoding this DOES seem crazy
 		// however it makes it easier if i ever need to
@@ -67,6 +68,15 @@ func GetLatestFindings(page int, pageSize int, provider string, minAge string, d
 		if !validProviders[provider] {
 			return nil, fmt.Errorf("invalid provider: %s", provider)
 		}
+	}
+
+	// DB Validation
+	if dbToGrabFrom == nil {
+		return nil, fmt.Errorf("database connection is required!")
+	}
+
+	query := dbToGrabFrom.Model(&domain.Finding{}).Where("detected_at >= ?", cutOffTime)
+	if provider != "*" {
 		query = query.Where("provider = ?", provider)
 	}
 

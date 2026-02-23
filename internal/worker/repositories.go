@@ -20,6 +20,10 @@ import (
 var skipDirectories = map[string]struct{}{
 	".git":         {},
 	"node_modules": {},
+	"vendor":       {},
+	"dist":         {},
+	"build":        {},
+	".terraform":   {},
 }
 
 // File extensions to scan

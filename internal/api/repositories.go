@@ -27,6 +27,7 @@ func GetRepositoryInfo(repo_url string, dbToGrabFrom *gorm.DB) ([]domain.Reposit
 }
 
 func GetAllRepositories(page int, pageSize int, dbToGrabFrom *gorm.DB) (*domain.PaginatedRepositories, error) {
+	// Validate APIs
 	if page < 1 {
 		return nil, fmt.Errorf("page must be greater than 0")
 	}
@@ -34,8 +35,14 @@ func GetAllRepositories(page int, pageSize int, dbToGrabFrom *gorm.DB) (*domain.
 		return nil, fmt.Errorf("page_size must be between 1 and 100")
 	}
 
+	if dbToGrabFrom == nil {
+		return nil, fmt.Errorf("database connection is required!")
+	}
+
 	var repositories []domain.Repository
 	var totalCount int64
+
+	// Validate DB
 
 	if err := dbToGrabFrom.Model(&domain.Repository{}).Count(&totalCount).Error; err != nil {
 		return nil, fmt.Errorf("error counting repositories: %w", err)
