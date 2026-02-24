@@ -26,10 +26,10 @@ func removeOldFindingsFunc(jctx JobContext) {
 	}
 }
 
-func init() {
-	RegisterJob(Job{
-		Name:     "Remove invalid keys",
-		Func:     removeOldFindingsFunc,
-		Schedule: 2 * time.Hour, // every 2 hours
-	})
-}
+// func init() {
+// 	RegisterJob(Job{
+// 		Name:     "Remove invalid keys",
+// 		Func:     removeOldFindingsFunc,
+// 		Schedule: 9 * time.Hour, // every 2 hours
+// 	})
+// }

@@ -8,7 +8,7 @@ import (
 var openrouter_base string = "https://openrouter.ai/api"
 
 func Openrouter(key string) bool {
-	req, err := http.NewRequest("POST", openrouter_base+"/v1/models", nil)
+	req, err := http.NewRequest("GET", openrouter_base+"/v1/key", nil)
 	if err != nil {
 		fmt.Println("Error creating request:", err)
 		return false
@@ -26,7 +26,8 @@ func Openrouter(key string) bool {
 	defer resp.Body.Close()
 
 	// no authorization
-	if resp.StatusCode == 403 || resp.StatusCode == 401 {
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+		fmt.Println("Status code is NOT OK. Provider: openrouter StatusCode: ", resp.StatusCode)
 		return false
 	}
 

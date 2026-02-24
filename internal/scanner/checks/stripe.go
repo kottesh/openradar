@@ -5,40 +5,40 @@ import (
 	"net/http"
 )
 
-var anthropic_base string = "https://api.anthropic.com"
+var stripe_base string = "https://api.stripe.com"
 
-func AnthropicCheck(key string) bool {
+func Stripe(key string) bool {
+	req, err := http.NewRequest("GET", stripe_base+"/v1/balance", nil)
 
-	req, err := http.NewRequest("GET", anthropic_base+"/v1/models", nil)
 	if err != nil {
-		fmt.Println("Error creating request:", err)
+		fmt.Println("Error creating request: ", err)
 		return false
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("x-api-key", key)
+	req.Header.Set("Authorization", "Bearer "+key)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
+
 	if err != nil {
 		fmt.Println("Error sending request:", err)
 		return false
 	}
+
 	defer resp.Body.Close()
 
-	// no auth
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
-		fmt.Println("Status code is NOT OK. Provider: anthropic StatusCode: ", resp.StatusCode)
+		fmt.Println("Status code is NOT OK. Provider: stripe StatusCode: ", resp.StatusCode)
 		return false
 	}
 
-	// is authed
 	return true
 }
 
 func init() {
 	AllChecks = append(AllChecks, Check{
-		Provider: "anthropic",
-		Check:    AnthropicCheck,
+		Provider: "stripe",
+		Check:    Stripe,
 	})
 }

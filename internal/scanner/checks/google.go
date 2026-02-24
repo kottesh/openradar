@@ -29,7 +29,8 @@ func Google(key string) bool {
 	//but i dont think we really need to tbh lmao
 
 	// no auth
-	if resp.StatusCode != 200 && resp.StatusCode != 202 {
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+		fmt.Println("Status code is NOT OK. Provider: google StatusCode: ", resp.StatusCode)
 		return false
 	}
 

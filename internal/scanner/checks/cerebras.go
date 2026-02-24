@@ -28,7 +28,8 @@ func Cerebras(key string) bool {
 	defer resp.Body.Close()
 
 	// no authorization
-	if resp.StatusCode == 403 || resp.StatusCode == 401 {
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+		fmt.Println("Status code is NOT OK. Provider: cerebras StatusCode: ", resp.StatusCode)
 		return false
 	}
 
