@@ -37,17 +37,15 @@ func main() {
 		worker.Start(ctx, cfg, database, hub)
 	}
 
-	jobContext := jobs.JobContext{
+	log.Print("Initializing Jobs")
+	jobs.RunJobs(jobs.JobContext{
 		DB:  database,
 		Cfg: cfg,
 		Ctx: ctx,
-	}
-
-	log.Print("Initializing Jobs")
-	jobs.RunJobs(jobContext)
+	})
 
 	// When shutting down
 	<-ctx.Done()
 
-	log.Println("Closing...")
+	log.Println("Ending Process.")
 }
