@@ -30,7 +30,7 @@ func Flavortown(key string) bool {
 
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode == http.StatusBadRequest || resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden {
 		fmt.Println("Non OK status!", resp.StatusCode)
 		return false
 	}

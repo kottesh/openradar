@@ -26,7 +26,8 @@ func Groq(key string) bool {
 	defer resp.Body.Close()
 
 	// no auth
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+	if resp.StatusCode == http.StatusBadRequest || resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden {
+
 		fmt.Println("Status code is NOT OK. Provider: groq StatusCode: ", resp.StatusCode)
 		return false
 	}
