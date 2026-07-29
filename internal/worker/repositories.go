@@ -78,6 +78,12 @@ func ScanFiles(directory string, cfg config.Config) ([]ScannedFile, error) {
 			return nil
 		}
 
+		// Never follow symlinks from an untrusted repository. A repository could
+		// otherwise point a scannable filename at a file outside its clone.
+		if dir.Type()&os.ModeSymlink != 0 {
+			return nil
+		}
+
 		// File has target extension
 		ext := strings.ToLower(filepath.Ext(dir.Name()))
 		_, ok := toScan[ext]
