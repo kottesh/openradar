@@ -3,8 +3,8 @@ set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)"
 
-if [[ -z "${GITHUB_TOKEN:-}" ]]; then
-  echo "[openradar] GITHUB_TOKEN is unavailable. Add it as a Codespaces secret, then rebuild/restart."
+if [[ -z "${OPENRADAR_GITHUB_TOKEN:-}" ]]; then
+  echo "[openradar] OPENRADAR_GITHUB_TOKEN is unavailable. Add it as a Codespaces secret, then rebuild/restart."
   exit 0
 fi
 
@@ -54,7 +54,7 @@ docker run -d \
   -e SCAN_MAX_REPO_MB=20 \
   -e SCAN_MAX_FILE_KB=256 \
   -e SCAN_MAX_CONCURRENT=2 \
-  -e GITHUB_TOKEN="$GITHUB_TOKEN" \
+  -e GITHUB_TOKEN="$OPENRADAR_GITHUB_TOKEN" \
   -e PORT=8080 \
   -e WEBHOOK_URL= \
   openradar:test >/dev/null
